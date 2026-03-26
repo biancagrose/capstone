@@ -1,0 +1,12 @@
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\bin\Release\FpMV.exe.manifest
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\bin\Release\FpMV.application
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\bin\Release\FpMV.exe
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\bin\Release\FpMV.pdb
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\obj\x86\Release\FpMV.Form1.resources
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\obj\x86\Release\FpMV.Form2.resources
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\obj\x86\Release\FpMV.Properties.Resources.resources
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\obj\x86\Release\FpMV.csproj.GenerateResource.Cache
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\obj\x86\Release\FpMV.exe.manifest
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\obj\x86\Release\FpMV.application
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\obj\x86\Release\FpMV.exe
+C:\Users\kennethko\Documents\Visual Studio 2010\Projects\FpMV\FpMV\obj\x86\Release\FpMV.pdb

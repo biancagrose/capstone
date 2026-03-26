@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FpMV", "FpMV\FpMV.csproj", "{621F6169-E45D-4E4F-8768-01B264C0688A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{621F6169-E45D-4E4F-8768-01B264C0688A}.Debug|x86.ActiveCfg = Release|x86
+		{621F6169-E45D-4E4F-8768-01B264C0688A}.Debug|x86.Build.0 = Release|x86
+		{621F6169-E45D-4E4F-8768-01B264C0688A}.Release|x86.ActiveCfg = Release|x86
+		{621F6169-E45D-4E4F-8768-01B264C0688A}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
