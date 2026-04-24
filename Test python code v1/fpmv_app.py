@@ -1,4 +1,5 @@
 import sys
+import re
 import os
 import subprocess
 import tempfile
@@ -362,32 +363,32 @@ class MainWindow(QMainWindow):
             return
 
         img = self.pil_image.copy()
-        
+
         c_val = self.contrast_slider.value()
-        c_factor = 1.0 + (c_val / 100.0) 
-        enhancer = ImageEnhance.Contrast(img)
-        img = enhancer.enhance(c_factor)
+        img = ImageEnhance.Contrast(img).enhance(1.0 + (c_val / 100.0))
 
         b_val = self.brightness_slider.value()
-        b_factor = 1.0 + (b_val / 100.0)
-        enhancer = ImageEnhance.Brightness(img)
-        img = enhancer.enhance(b_factor)
+        img = ImageEnhance.Brightness(img).enhance(1.0 + (b_val / 100.0))
 
         img = img.convert("RGBA")
         data = img.tobytes("raw", "RGBA")
         qim = QImage(data, img.width, img.height, QImage.Format_RGBA8888)
-        
-        opacity = self.opacity_slider.value() / 100.0
-        
+
         pixmap = QPixmap.fromImage(qim)
+
+        opacity = self.opacity_slider.value() / 100.0
+
         self.scene.clear()
         self.minutiae_items.clear()
-        
+
         self.image_item = self.scene.addPixmap(pixmap)
         self.image_item.setOpacity(opacity)
-        self.scene.setSceneRect(QRectF(pixmap.rect()))
-        
+
+        # CRITICAL FIX: lock coordinate system to image pixels
+        self.scene.setSceneRect(0, 0, pixmap.width(), pixmap.height())
+
         self.update_overlay()
+        self.view.fitInView(self.scene.sceneRect(), Qt.KeepAspectRatio)
 
     def run_minutiae_detection(self):
         if not self.current_image_path: return
@@ -408,63 +409,89 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Execution Error", str(e))
 
+
     def parse_minutiae(self, min_file):
         self.minutiae_data.clear()
-        if not os.path.exists(min_file): return
+        if not os.path.exists(min_file):
+            return
+
+        pattern = re.compile(
+            r"(\d+)\s*,\s*(\d+)\s*:\s*([\d.]+)\s*:\s*([\d.]+)\s*:\s*(\w+)"
+        )
 
         with open(min_file, 'r') as f:
             lines = f.readlines()
-            if len(lines) < 4: return
-            
-            total_min = int(lines[2].split()[0])
-            self.lbl_total_min.setText(str(total_min))
-            
-            for line in lines[4:]:
-                parts = line.split(':')
-                if len(parts) >= 5:
-                    x, y = map(int, parts[1].split(','))
-                    direction = float(parts[2])
-                    quality = float(parts[3])
-                    m_type = parts[4].strip()
-                    self.minutiae_data.append({"x": x, "y": y, "dir": direction, "rel": quality, "typ": m_type})
+
+        if len(lines) > 2:
+            try:
+                total_min = int(lines[2].split()[0])
+                self.lbl_total_min.setText(str(total_min))
+            except:
+                self.lbl_total_min.setText("N/A")
+
+        for line in lines[4:]:
+            match = pattern.search(line)
+            if match:
+                x = int(match.group(1))
+                y = int(match.group(2))
+                direction = float(match.group(3))
+                quality = float(match.group(4))
+                m_type = match.group(5)
+
+                self.minutiae_data.append({
+                    "x": x,
+                    "y": y,
+                    "dir": direction,
+                    "rel": quality,
+                    "typ": m_type
+                })
 
     def update_overlay(self):
         for item in self.minutiae_items:
             self.scene.removeItem(item)
         self.minutiae_items.clear()
 
-        if not self.minutiae_data: return
+        if not self.minutiae_data:
+            return
 
         quality_threshold = self.quality_slider.value() / 100.0
         displayed = 0
+
         radius = 4
         line_len = 14
 
         for m in self.minutiae_data:
-            if m["rel"] > quality_threshold:
-                displayed += 1
-                x, y = m["x"], m["y"]
-                
-                angle = m["dir"] * 11.25 - 90
-                rad_angle = math.radians(angle)
-                x2 = x + (math.cos(rad_angle) * line_len)
-                y2 = y + (math.sin(rad_angle) * line_len)
+            if m["rel"] < quality_threshold:
+                continue
 
-                color = QColor(0, 0, 255) 
-                if m["typ"] == "RIG": color = QColor(255, 0, 0) 
-                elif m["typ"] == "BIF": color = QColor(0, 255, 0) 
+            displayed += 1
 
-                pen = QPen(color, 2)
-                
-                if m["typ"] == "BIF":
-                    item1 = self.scene.addRect(x - radius, y - radius, radius * 2, radius * 2, pen)
-                else:
-                    item1 = self.scene.addEllipse(x - radius, y - radius, radius * 2, radius * 2, pen)
-                
-                item2 = self.scene.addLine(x, y, x2, y2, pen)
-                self.minutiae_items.extend([item1, item2])
+            x, y = m["x"], m["y"]
+
+            angle = math.radians(m["dir"] * 11.25 - 90)
+            x2 = x + math.cos(angle) * line_len
+            y2 = y + math.sin(angle) * line_len
+
+            if m["typ"] == "RIG":
+                color = QColor(255, 0, 0)
+            elif m["typ"] == "BIF":
+                color = QColor(0, 255, 0)
+            else:
+                color = QColor(0, 0, 255)
+
+            pen = QPen(color, 2)
+
+            if m["typ"] == "BIF":
+                item = self.scene.addRect(x - radius, y - radius, radius * 2, radius * 2, pen)
+            else:
+                item = self.scene.addEllipse(x - radius, y - radius, radius * 2, radius * 2, pen)
+
+            line = self.scene.addLine(x, y, x2, y2, pen)
+
+            self.minutiae_items.extend([item, line])
 
         self.lbl_disp_min.setText(str(displayed))
+
 
     def run_nfiq(self):
         if not self.current_image_path: return
