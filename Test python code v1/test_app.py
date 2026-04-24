@@ -68,8 +68,6 @@ def load_stylesheet(app, path):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    load_stylesheet(app, "Test python code v1\style.qss.css")
-
     window = Playground()
     window.show()
 
